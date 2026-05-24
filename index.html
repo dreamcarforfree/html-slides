@@ -35,6 +35,17 @@
             border-color: rgba(56, 189, 132, 0.4);
             background-color: rgba(56, 189, 132, 0.04);
         }
+        li.light-card {
+            background-color: #fafaf8;
+            border: 1px solid #ddd9d2;
+        }
+        li.light-card:hover {
+            border-color: rgba(45, 75, 142, 0.4);
+            background-color: rgba(45, 75, 142, 0.03);
+        }
+        li.light-card a { color: #2D4B8E; }
+        li.light-card .tag { color: #2A7F6F; border-color: rgba(42,127,111,0.35); }
+        li.light-card .desc { color: #4A4A6A; }
         a {
             color: #5cd6a0;
             text-decoration: none;
@@ -67,10 +78,15 @@
     <p>Click on any link below to view the presentation. Use left/right arrows or swipe to navigate.</p>
     
     <ul>
+        <li class="light-card">
+            <div class="tag">✨ NEW — Light Mode</div>
+            <a href="howtoopenclaw-deck-light.html" target="_blank">HowToOpenClaw.ai Deck — Light Edition</a>
+            <div class="desc">Premium white-background version. Indigo × teal palette, Playfair Display serif headings, consulting-grade layout. Gold rule lines.</div>
+        </li>
         <li>
-            <div class="tag">NEW (OpenClaw Output)</div>
-            <a href="howtoopenclaw-deck.html" target="_blank">HowToOpenClaw.ai Deck</a>
-            <div class="desc">Newly generated pitch deck showcasing the course content and values.</div>
+            <div class="tag">Dark Mode</div>
+            <a href="howtoopenclaw-deck.html" target="_blank">HowToOpenClaw.ai Deck — Dark Edition</a>
+            <div class="desc">Original dark mode pitch deck with green accent and terminal aesthetic.</div>
         </li>
         <li>
             <div class="tag">REFERENCE</div>

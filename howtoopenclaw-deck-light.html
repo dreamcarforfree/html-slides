@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to OpenClaw — Set Up Your First AI Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ===== Design tokens — Premium Light (Consulting-grade) ===== */
+:root {
+  /* Core palette */
+  --bg:           #FAFAF8;          /* warm white, never harsh */
+  --bg-subtle:    #F4F3EF;          /* slightly warmer for cards */
+  --bg-inset:     #EEECEA;          /* deepest inset bg */
+
+  /* Accent: Indigo × Teal dual-tone */
+  --accent:       #2D4B8E;          /* deep navy-indigo — headlines, badges */
+  --accent-warm:  #B85C38;          /* terracotta — second accent */
+  --accent-teal:  #2A7F6F;          /* forest teal — third accent */
+  --accent-gold:  #B89A4A;          /* warm gold — rule lines */
+  --accent-dim:   rgba(45,75,142,0.08);
+  --accent-glow:  rgba(45,75,142,0.16);
+
+  /* Text */
+  --text-primary:   #1A1A2E;        /* near-black navy */
+  --text-secondary: #4A4A6A;        /* muted navy */
+  --text-dim:       #8A8AA8;        /* placeholder / footer */
+
+  /* Borders */
+  --border:         #DDD9D2;        /* warm grey */
+  --border-accent:  rgba(184,154,74,0.35);  /* gold rule */
+
+  /* Fonts */
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-en:    'Inter', system-ui, sans-serif;
+  --font-mono:  'JetBrains Mono', 'Courier New', monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ===== Reset ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-en);
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text-primary);
+}
+
+/* ===== Viewport ===== */
+.slide-viewport {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--bg);
+  overflow: hidden;
+}
+.slide-viewport.animating { pointer-events: none; }
+
+/* ===== Slide base ===== */
+.slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: clamp(2.5rem, 6vw, 5rem) clamp(3rem, 8vw, 8rem);
+
+  opacity: 0;
+  transform: translateX(100%);
+  pointer-events: none;
+  transition:
+    opacity 400ms ease-in-out,
+    transform 450ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.slide.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+  z-index: 2;
+}
+.slide.stand-left { transform: translateX(-100%); }
+
+/* Subtle grid texture */
+.slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border-accent) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-accent) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+.slide > * { position: relative; z-index: 2; }
+
+/* ===== Layout ===== */
+.slide__inner {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: center;
+  gap: clamp(0.8rem, 2vw, 1.6rem);
+}
+.slide__header {}
+.slide__body { display: flex; flex-direction: column; gap: 1rem; }
+.slide__footer {
+  font-size: clamp(0.6rem, 0.9vw, 0.75rem);
+  color: var(--text-dim);
+  text-align: right;
+  margin-top: auto;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+/* ===== Typography ===== */
+h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.4rem, 3vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 0.6rem;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+h3 {
+  font-family: var(--font-en);
+  font-size: clamp(1rem, 1.8vw, 1.4rem);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+p, li {
+  font-family: var(--font-en);
+  font-size: clamp(0.85rem, 1.4vw, 1.15rem);
+  line-height: 1.75;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+ul li {
+  padding: clamp(0.55rem, 0.9vw, 0.75rem) clamp(0.9rem, 1.3vw, 1.1rem);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s ease, border-left-color 0.2s ease;
+}
+ul li:nth-child(2) { border-left-color: var(--accent-teal); }
+ul li:nth-child(3) { border-left-color: var(--accent-warm); }
+ul li:nth-child(4) { border-left-color: var(--accent-gold); }
+ul li::before { content: ''; flex-shrink: 0; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); margin-top: 0.55em; }
+ul li:nth-child(2)::before { background: var(--accent-teal); }
+ul li:nth-child(3)::before { background: var(--accent-warm); }
+ul li:nth-child(4)::before { background: var(--accent-gold); }
+
+/* ===== Slide variants ===== */
+.slide--intro  { background: linear-gradient(135deg, #FAFAF8 0%, #F0EEF8 100%); }
+.slide--content { background: var(--bg); }
+.slide--content-alt { background: linear-gradient(160deg, #FAFAF8 60%, #F0F4F0 100%); }
+.slide--code   { background: var(--bg); }
+.slide--diagram { background: linear-gradient(135deg, #F8F6F0 0%, #F0F4F8 100%); }
+.slide--end    { background: linear-gradient(135deg, #1A1A2E 0%, #2D2D4E 100%); }
+.slide--end h1, .slide--end h2, .slide--end p, .slide--end .accent-line { color: #F0EBE0; }
+.slide--end .slide__footer { color: rgba(240,235,224,0.35); }
+.slide--end .badge { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color: #C6A55C; }
+
+/* ===== Reveal animation ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.55s var(--ease-out-expo), transform 0.55s var(--ease-out-expo);
+}
+.slide.active .reveal { opacity: 1; transform: translateY(0); }
+
+.reveal:nth-child(1) { transition-delay: 0.06s; }
+.reveal:nth-child(2) { transition-delay: 0.14s; }
+.reveal:nth-child(3) { transition-delay: 0.22s; }
+.reveal:nth-child(4) { transition-delay: 0.30s; }
+.reveal:nth-child(5) { transition-delay: 0.38s; }
+.reveal:nth-child(6) { transition-delay: 0.46s; }
+.reveal:nth-child(7) { transition-delay: 0.54s; }
+.reveal:nth-child(8) { transition-delay: 0.62s; }
+.slide.active .slide__body > .reveal:nth-child(1) { transition-delay: 0.14s; }
+.slide.active .slide__body > .reveal:nth-child(2) { transition-delay: 0.24s; }
+.slide.active .slide__body > .reveal:nth-child(3) { transition-delay: 0.34s; }
+.slide.active .slide__body > .reveal:nth-child(4) { transition-delay: 0.44s; }
+.slide.active .slide__body > .reveal:nth-child(5) { transition-delay: 0.54s; }
+.slide.active ul li.reveal:nth-child(1) { transition-delay: 0.14s; }
+.slide.active ul li.reveal:nth-child(2) { transition-delay: 0.24s; }
+.slide.active ul li.reveal:nth-child(3) { transition-delay: 0.34s; }
+.slide.active ul li.reveal:nth-child(4) { transition-delay: 0.44s; }
+.slide.active ul li.reveal:nth-child(5) { transition-delay: 0.54s; }
+
+/* ===== Code block ===== */
+.code-block {
+  background: #1A1A2E;
+  border: 1px solid #2D2D4E;
+  border-radius: 6px;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: clamp(0.65rem, 1.1vw, 0.9rem);
+  line-height: 1.7;
+  counter-reset: line-number;
+  width: 100%;
+  box-shadow: 0 4px 16px rgba(26,26,46,0.12);
+}
+.code-block::before {
+  content: attr(data-language);
+  display: block;
+  background: #12122A;
+  color: #5a5a7a;
+  font-size: 0.75em;
+  padding: 0.4em 1em;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-family: var(--font-mono);
+  border-bottom: 1px solid #2D2D4E;
+}
+.code-block code { display: block; padding: 1rem 1.2rem; overflow-x: auto; }
+.code-block .line {
+  display: block;
+  padding: 2px 0 2px 3em;
+  position: relative;
+  counter-increment: line-number;
+  transition: background-color 0.3s ease, opacity 0.3s ease;
+  color: #B8B0C8;
+}
+.code-block .line::before {
+  content: counter(line-number);
+  position: absolute;
+  left: 0;
+  width: 2.5em;
+  text-align: right;
+  color: #2D2D4E;
+  font-size: 0.85em;
+  user-select: none;
+}
+.code-block .line--highlight {
+  background: rgba(45,75,142,0.2);
+  border-left: 3px solid #2D4B8E;
+  padding-left: calc(3em - 3px);
+}
+.code-block .line--highlight::before { color: #2D4B8E; }
+.code-block.dim-others .line:not(.line--highlight) { opacity: 0.3; }
+.kw  { color: #7B93C8; }
+.fn  { color: #5CB8A0; }
+.str { color: #C89B5C; }
+.cmt { color: #4A4A6A; font-style: italic; }
+.var { color: #C8C0D8; }
+.op  { color: #7070A0; }
+.tag { color: #7B93C8; }
+.attr{ color: #5CB8A0; }
+.val { color: #C89B5C; }
+
+/* ===== Components ===== */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+.split-card {
+  padding: clamp(0.9rem, 1.6vw, 1.3rem);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.info-card {
+  padding: clamp(1rem, 1.8vw, 1.4rem);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.info-card .card-title {
+  font-family: var(--font-mono);
+  font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+  color: var(--accent);
+  margin-bottom: 0.6rem;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+.badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+  color: var(--accent);
+  padding: 0.25em 0.7em;
+  border: 1px solid var(--accent-dim);
+  border-radius: 100px;
+  letter-spacing: 0.04em;
+  background: var(--accent-dim);
+  font-weight: 500;
+}
+
+/* Eyebrow label — replaces terminal-badge */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: clamp(0.7rem, 1vw, 0.85rem);
+  color: var(--accent);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+  display: block;
+}
+
+/* Gold rule */
+.rule-line {
+  width: 48px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-gold), transparent);
+  margin: 0.4rem 0 0.6rem;
+}
+
+.accent-line {
+  width: 50px;
+  height: 2px;
+  background: var(--accent-gold);
+  margin: 0.5rem 0;
+}
+
+/* Big title for intro */
+.big-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.4rem, 7vw, 5.5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-align: center;
+  color: var(--text-primary);
+}
+.big-title .accent { color: var(--accent); }
+
+.intro-sub {
+  font-family: var(--font-mono);
+  font-size: clamp(0.8rem, 1.3vw, 1rem);
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+.intro-tag {
+  font-family: var(--font-mono);
+  font-size: clamp(0.75rem, 1.1vw, 0.9rem);
+  color: var(--accent);
+  letter-spacing: 0.16em;
+  text-transform: lowercase;
+}
+
+/* ===== Navigation UI ===== */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: rgba(45,75,142,0.08);
+  z-index: 101;
+}
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-teal));
+  transition: width 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.slide-counter {
+  position: fixed;
+  bottom: 16px;
+  right: 24px;
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  z-index: 102;
+  letter-spacing: 0.06em;
+}
+.nav-buttons {
+  position: fixed;
+  bottom: 16px;
+  left: 24px;
+  display: flex;
+  gap: 6px;
+  z-index: 102;
+}
+.nav-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.8);
+  color: var(--text-dim);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.nav-btn:hover { background: #fff; color: var(--accent); border-color: var(--accent); box-shadow: 0 2px 8px rgba(45,75,142,0.12); }
+.slide--end .progress-bar { background: rgba(255,255,255,0.1); }
+
+/* ===== Responsive ===== */
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .slide { transition-duration: 0.1s !important; }
+  .reveal { transform: none !important; }
+}
+@media (hover: none) and (pointer: coarse) {
+  .nav-btn { width: 44px; height: 44px; }
+}
+@media (max-height: 600px) {
+  .slide { padding: clamp(1rem, 3vw, 2rem); }
+  h1 { font-size: clamp(1.5rem, 4vw, 2.5rem); }
+  h2 { font-size: clamp(1.2rem, 2.5vw, 1.8rem); }
+}
+
+/* Intro centering */
+.slide--intro .slide__inner { max-width: 1000px; align-items: center; text-align: center; }
+.slide--intro .slide__header,
+.slide--intro .slide__body { align-items: center; text-align: center; }
+
+/* End slide overrides */
+.slide--end .eyebrow { color: var(--accent-gold); }
+.slide--end .info-card { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); }
+.slide--end .info-card .card-title { color: var(--accent-gold); }
+.slide--end .info-card p { color: rgba(240,235,224,0.75); }
+.slide--end ul li { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+.slide--end ul li p { color: rgba(240,235,224,0.8); }
+
+</style>
+</head>
+<body>
+
+<div class="slide-viewport" id="viewport">
+
+  <!-- 01 — Title -->
+  <section class="slide slide--intro active" id="slide-1"
+    role="region" aria-roledescription="slide" aria-label="slide 1" aria-hidden="false">
+    <div class="slide__inner">
+      <div class="slide__body">
+        <div class="intro-tag reveal">// howtoopenclaw.ai</div>
+        <div class="big-title reveal">
+          Set up your<br><span class="accent">first AI agent</span>
+        </div>
+        <div class="rule-line reveal" style="margin: 0.6rem auto;"></div>
+        <div class="intro-sub reveal">// copy. paste. done.</div>
+      </div>
+      <div class="slide__footer" style="text-align: center;">www.howtoopenclaw.ai &nbsp;·&nbsp; 2026</div>
+    </div>
+  </section>
+
+  <!-- 02 — The Problem -->
+  <section class="slide slide--content" id="slide-2"
+    role="region" aria-roledescription="slide" aria-label="slide 2" aria-hidden="true">
+    <div class="slide__inner">
+      <div class="slide__header">
+        <span class="eyebrow reveal">The Gap</span>
+        <h2 class="reveal">Everyone talks about AI agents.<br>Almost no one actually has one.</h2>
+        <div class="rule-line reveal"></div>
+      </div>
+      <div class="slide__body">
+        <ul>
+          <li class="reveal"><p>Tutorials assume command-line fluency</p></li>
+          <li class="reveal"><p>Docs jump straight to API keys and YAML</p></li>
+          <li class="reveal"><p>"Just install it" still leaves you stuck on step 3</p></li>
+          <li class="reveal"><p>Engineers get the leverage. Everyone else watches.</p></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 — The Promise -->
+  <section class="slide slide--content-alt" id="slide-3"
+    role="region" aria-roledescription="slide" aria-label="slide 3" aria-hidden="true">
+    <div class="slide__inner">
+      <div class="slide__header">
+        <span class="eyebrow reveal">The Promise</span>
+        <h2 class="reveal">The easiest course ever built</h2>
+        <div class="rule-line reveal"></div>
+      </div>
+      <div class="slide__body">
+        <ul>
+          <li class="reveal"><p>We give you every link</p></li>
+          <li class="reveal"><p>We give you every prompt</p></li>
+          <li class="reveal"><p>We give you every exact step</p></li>
+          <li class="reveal"><p>No coding. No mechanics. No CS background.</p></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 — Curriculum -->
+  <section class="slide slide--diagram" id="slide-4"
+    role="region" aria-roledescription="slide" aria-label="slide 4" aria-hidden="true">
+    <div class="slide__inner">
+      <div class="slide__header">
+        <span class="eyebrow reveal">Curriculum</span>
+        <h2 class="reveal">Five chapters + a bonus</h2>
+        <div class="rule-line reveal"></div>
+      </div>
+      <div class="slide__body">
+        <div class="split">
+          <div class="split-card reveal">
+            <p style="font-size: clamp(0.8rem,1.3vw,1.05rem); margin-bottom: 0.7rem;">
+              <strong style="color: var(--accent);">Ch 0 — Hardware</strong><br>
+              <span style="color: var(--text-secondary);">What to use, what to avoid, what to buy if you must.</span>
+            </p>
+            <p style="font-size: clamp(0.8rem,1.3vw,1.05rem); margin-bottom: 0.7rem;">
+              <strong style="color: var(--accent-teal);">Ch 1 — Install</strong><br>
+              <span style="color: var(--text-secondary);">API keys, OpenClaw setup, core capabilities.</span>
+            </p>
+            <p style="font-size: clamp(0.8rem,1.3vw,1.05rem);">
+              <strong style="color: var(--accent-warm);">Ch 2 — Memory Migration</strong><br>
+              <span style="color: var(--text-secondary);">Import your ChatGPT, Claude &amp; Gemini history.</span>
+            </p>
+          </div>
+          <div class="split-card reveal">
+            <p style="font-size: clamp(0.8rem,1.3vw,1.05rem); margin-bottom: 0.7rem;">
+              <strong style="color: var(--accent);">Ch 3 — Google Workspace</strong><br>
+              <span style="color: var(--text-secondary);">Gmail, Calendar, Docs, Sheets via Gog.</span>
+            </p>
+            <p style="font-size: clamp(0.8rem,1.3vw,1.05rem); margin-bottom: 0.7rem;">
+              <strong style="color: var(--accent-teal);">Ch 4 — Discord</strong><br>
+              <span style="color: var(--text-secondary);">Let your team use the agent you built.</span>
+            </p>
+            <p style="font-size: clamp(0.8rem,1.3vw,1.05rem);">
+              <strong style="color: var(--accent-warm);">Bonus — Training Tips</strong><br>
+              <span style="color: var(--text-secondary);">Real lessons. Skip the trial-and-error.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 — Daily Life -->
+  <section class="slide slide--content" id="slide-5"
+    role="region" aria-roledescription="slide" aria-label="slide 5" aria-hidden="true">
+    <div class="slide__inner">
+      <div class="slide__header">
+        <span class="eyebrow reveal">Daily Life</span>
+        <h2 class="reveal">Small wins, every day</h2>
+        <div class="rule-line reveal"></div>
+      </div>
+      <div class="slide__body">
+        <div class="info-card reveal">
+          <div class="card-title">// real student story</div>
+          <p>
+            The chiropractor's front desk printed her schedule for the next 10 sessions.
+            She took a photo. Sent it to her agent. Said, <em>"add these to my calendar."</em><br>
+            <strong style="color: var(--accent);">That's it.</strong> No typing each event one by one.
+          </p>
+        </div>
+        <div class="info-card reveal">
+          <div class="card-title">// the principle</div>
+          <p>Anything you currently type, search, copy, paste, or try to remember — your agent can do for you.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 — Google Workspace -->
+  <section class="slide slide--content-alt" id="slide-6"
+    role="region" aria-roledescription="slide" aria-label="slide 6" aria-hidden="true">
+    <div class="slide__inner">
+      <div class="slide__header">
+        <span class="eyebrow reveal">Google Workspace</span>
+        <h2 class="reveal">Your daily operating layer</h2>
+        <div class="rule-line reveal"></div>
+      </div>
+      <div class="slide__body">
+        <ul>
+          <li class="reveal"><p>30+ products: Gmail, Calendar, Docs, Sheets, Drive, Meet…</p></li>
+          <li class="reveal"><p>Builds full reports and slide decks on request</p></li>
+          <li class="reveal"><p>Plans your week, tracks follow-ups, drafts replies</p></li>
+          <li class="reveal"><p>Even helps navigate office politics — using meeting transcripts and context</p></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 — Income -->
+  <section class="slide slide--content" id="slide-7"
+    role="region" aria-roledescription="slide" aria-label="slide 7" aria-hidden="true">
+    <div class="slide__inner">
+      <div class="slide__header">
+        <span class="eyebrow reveal">Income</span>
+        <h2 class="reveal">Agents that earn while you sleep</h2>
+        <div class="rule-line reveal"></div>
+      </div>
+      <div class="slide__body">
+        <div class="info-card reveal">
+          <div class="card-title">// outbound</div>
+          <p>Lead generation. Cold emails. Following up until they reply. The same playbook you'd hand a junior employee — running on a schedule.</p>
+        </div>
+        <div class="info-card reveal">
+          <div class="card-title">// arbitrage</div>
+          <p>Polymarket scanner that watches odds 24/7, compares against public information, surfaces mispriced markets before you'd ever notice.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 — Team -->
+  <section class="slide slide--diagram" id="slide-8"
+    role="region" aria-roledescription="slide" aria-label="slide 8" aria-hidden="true">
+    <div class="slide__inner">
+      <div class="slide__header">
+        <span class="eyebrow reveal">Team Leverage</span>
+        <h2 class="reveal">One agent. Your whole team.</h2>
+        <div class="rule-line reveal"></div>
+      </div>
+      <div class="slide__body">
+        <div class="split">
+          <div class="split-card reveal">
+            <p><strong style="color: var(--accent);">You build it.</strong><br><span style="color: var(--text-secondary);">Configure once. Connect to your Workspace, your docs, your systems.</span></p>
+          </div>
+          <div class="split-card reveal">
+            <p><strong style="color: var(--accent-teal);">They use it.</strong><br><span style="color: var(--text-secondary);">Through Discord, from any device. No access to your accounts. No passwords.</span></p>
+          </div>
+        </div>
+        <div class="info-card reveal" style="margin-top: 0.4rem;">
+          <div class="card-title">// always on</div>
+          <p>Welcomes new members at 3am. Moderates while you're in meetings. Answers the repetitive questions so your team handles the hard ones.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 — In the Wild -->
+  <section class="slide slide--content-alt" id="slide-9"
+    role="region" aria-roledescription="slide" aria-label="slide 9" aria-hidden="true">
+    <div class="slide__inner">
+      <div class="slide__header">
+        <span class="eyebrow reveal">In the Wild</span>
+        <h2 class="reveal">What students actually built</h2>
+        <div class="rule-line reveal"></div>
+      </div>
+      <div class="slide__body">
+        <ul>
+          <li class="reveal"><p>🖨️ Etsy × 3D printer — agent picked a product, printed it overnight</p></li>
+          <li class="reveal"><p>📈 Polymarket scanner — flags mispriced odds 24/7</p></li>
+          <li class="reveal"><p>🛡️ Security watcher — caught a hacker mining Bitcoin on a network</p></li>
+          <li class="reveal"><p>🎭 Persona stack — one script, two tones, two audiences</p></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 — Instructor -->
+  <section class="slide slide--content" id="slide-10"
+    role="region" aria-roledescription="slide" aria-label="slide 10" aria-hidden="true">
+    <div class="slide__inner">
+      <div class="slide__header">
+        <span class="eyebrow reveal">Your Instructor</span>
+        <h2 class="reveal">Hi, this is Mirae 👋</h2>
+        <div class="rule-line reveal"></div>
+      </div>
+      <div class="slide__body">
+        <div class="info-card reveal">
+          <div class="card-title">// background</div>
+          <p>Silicon Valley UX designer. Works with engineers and founders, translating what they build into systems non-technical people can actually use.</p>
+        </div>
+        <div class="info-card reveal">
+          <div class="card-title">// course philosophy</div>
+          <p>Every technical step in plain language. Every command copy-and-paste. Every concept explained with analogies. Built <em>by</em> a non-coder, <em>for</em> non-coders — with an ex-Google tech lead behind the curtain.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 — Pricing -->
+  <section class="slide slide--diagram" id="slide-11"
+    role="region" aria-roledescription="slide" aria-label="slide 11" aria-hidden="true">
+    <div class="slide__inner">
+      <div class="slide__header">
+        <span class="eyebrow reveal">Pricing</span>
+        <h2 class="reveal">$150. One time.</h2>
+        <div class="rule-line reveal"></div>
+      </div>
+      <div class="slide__body">
+        <div class="split">
+          <div class="split-card reveal">
+            <p style="font-size: clamp(0.9rem,1.4vw,1.1rem); margin-bottom: 0.5rem;">
+              <strong style="color: var(--accent);">What's inside</strong>
+            </p>
+            <p style="font-size: clamp(0.8rem,1.2vw,1rem); color: var(--text-secondary); line-height: 1.9;">
+              5 chapters + bonus<br>
+              Step-by-step videos<br>
+              Copy-and-paste prompts<br>
+              4.9 / 5 from students worldwide
+            </p>
+          </div>
+          <div class="split-card reveal">
+            <p style="font-size: clamp(0.9rem,1.4vw,1.1rem); margin-bottom: 0.5rem;">
+              <strong style="color: var(--accent-teal);">What it replaces</strong>
+            </p>
+            <p style="font-size: clamp(0.8rem,1.2vw,1rem); color: var(--text-secondary); line-height: 1.9;">
+              Hiring a developer ($5k+)<br>
+              Weeks of trial and error<br>
+              SaaS tools you keep renting<br>
+              The feeling of falling behind
+            </p>
+          </div>
+        </div>
+        <p class="reveal" style="text-align: center; color: var(--accent); font-family: var(--font-mono); font-size: clamp(0.8rem,1.2vw,1rem); margin-top: 0.5rem; letter-spacing: 0.04em;">
+          1–2 days to install. Lifetime to use.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 — Closer (dark slide for impact) -->
+  <section class="slide slide--end" id="slide-12"
+    role="region" aria-roledescription="slide" aria-label="slide 12" aria-hidden="true">
+    <div class="slide__inner" style="text-align: center; align-items: center;">
+      <div class="slide__body" style="align-items: center;">
+        <span class="eyebrow reveal" style="color: var(--accent-gold);">Stop watching. Start building.</span>
+        <h1 class="reveal" style="color: #F0EBE0; font-size: clamp(2.5rem,6vw,5rem);">Build yours.</h1>
+        <div class="rule-line reveal" style="margin: 0.7rem auto; background: linear-gradient(90deg, var(--accent-gold), transparent);"></div>
+        <p class="reveal" style="font-size: clamp(0.95rem,1.8vw,1.3rem); color: rgba(240,235,224,0.75);">
+          This is your best leverage for 2026.<br>
+          Don't waste one more day.
+        </p>
+        <p class="reveal" style="font-family: var(--font-mono); color: #C6A55C; font-size: clamp(1rem,2vw,1.4rem); margin-top: 0.8rem; letter-spacing: 0.04em;">
+          www.howtoopenclaw.ai
+        </p>
+        <div class="reveal" style="display: flex; gap: 0.5rem; margin-top: 0.9rem; justify-content: center; flex-wrap: wrap;">
+          <span class="badge">$150 one-time</span>
+          <span class="badge">4.9 / 5</span>
+          <span class="badge">No coding</span>
+          <span class="badge">1–2 days</span>
+        </div>
+      </div>
+      <div class="slide__footer" style="color: rgba(240,235,224,0.25); text-align: center;">www.howtoopenclaw.ai &nbsp;·&nbsp; 2026</div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Navigation UI -->
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+<div class="slide-counter" id="slideCounter">01 / 12</div>
+<div class="nav-buttons">
+  <button class="nav-btn" id="btnPrev" aria-label="Previous slide">&#8249;</button>
+  <button class="nav-btn" id="btnNext" aria-label="Next slide">&#8250;</button>
+</div>
+
+<script>
+class Presentation {
+  constructor() {
+    this.viewport = document.getElementById('viewport');
+    this.slides = Array.from(this.viewport.querySelectorAll('.slide'));
+    this.total = this.slides.length;
+    this.current = 0;
+    this.isAnimating = false;
+    this.DURATION = 450;
+
+    this.slides.forEach(s => this._applyCodeHighlights(s));
+    this._restoreFromHash();
+    this._bindKeyboard();
+    this._bindTouch();
+    this._bindButtons();
+    this._bindHash();
+    this._updateUI();
+  }
+
+  goNext() {
+    if (this.isAnimating || this.current >= this.total - 1) return;
+    this._goSlide(this.current + 1, 'next');
+  }
+
+  goPrev() {
+    if (this.isAnimating || this.current <= 0) return;
+    this._goSlide(this.current - 1, 'prev');
+  }
+
+  _goSlide(target, dir) {
+    if (target < 0 || target >= this.total || target === this.current) return;
+    this.isAnimating = true;
+    this.viewport.classList.add('animating');
+
+    const leaving = this.slides[this.current];
+    const entering = this.slides[target];
+
+    leaving.classList.remove('active');
+    if (dir === 'next') leaving.classList.add('stand-left');
+    leaving.setAttribute('aria-hidden', 'true');
+
+    entering.style.transform = dir === 'next' ? 'translateX(100%)' : 'translateX(-100%)';
+    entering.classList.remove('stand-left');
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        entering.classList.add('active');
+        entering.setAttribute('aria-hidden', 'false');
+        entering.style.transform = '';
+      });
+    });
+
+    const cleanup = () => {
+      this.isAnimating = false;
+      this.viewport.classList.remove('animating');
+      leaving.classList.remove('stand-left');
+      leaving.style.transform = '';
+    };
+
+    entering.addEventListener('transitionend', cleanup, { once: true });
+    setTimeout(cleanup, this.DURATION + 100);
+
+    this.current = target;
+    this._updateUI();
+    history.replaceState(null, '', `#slide-${target + 1}`);
+  }
+
+  _updateUI() {
+    const n = String(this.current + 1).padStart(2, '0');
+    const t = String(this.total).padStart(2, '0');
+    document.getElementById('slideCounter').textContent = `${n} / ${t}`;
+    const pct = this.total > 1 ? (this.current / (this.total - 1)) * 100 : 100;
+    document.getElementById('progressFill').style.width = `${pct}%`;
+    document.getElementById('btnPrev').disabled = this.current === 0;
+    document.getElementById('btnNext').disabled = this.current === this.total - 1;
+  }
+
+  _restoreFromHash() {
+    const m = location.hash.match(/^#slide-(\d+)$/);
+    if (m) {
+      const idx = Math.min(Math.max(parseInt(m[1], 10) - 1, 0), this.total - 1);
+      if (idx !== 0) {
+        this.slides[0].classList.remove('active');
+        this.slides[0].setAttribute('aria-hidden', 'true');
+        this.slides[idx].classList.add('active');
+        this.slides[idx].setAttribute('aria-hidden', 'false');
+        this.current = idx;
+      }
+    }
+  }
+
+  _bindKeyboard() {
+    document.addEventListener('keydown', e => {
+      switch(e.key) {
+        case 'ArrowRight': case 'ArrowDown': case ' ': case 'PageDown': e.preventDefault(); this.goNext(); break;
+        case 'ArrowLeft':  case 'ArrowUp':             case 'PageUp':   e.preventDefault(); this.goPrev(); break;
+        case 'Home': e.preventDefault(); this._goSlide(0, 'prev'); break;
+        case 'End':  e.preventDefault(); this._goSlide(this.total - 1, 'next'); break;
+        case 'f': case 'F': !document.fullscreenElement ? document.documentElement.requestFullscreen?.() : document.exitFullscreen?.(); break;
+      }
+    });
+  }
+
+  _bindTouch() {
+    let startX = null, startY = null;
+    this.viewport.addEventListener('touchstart', e => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }, { passive: true });
+    this.viewport.addEventListener('touchend', e => {
+      if (startX === null) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = e.changedTouches[0].clientY - startY;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+        dx < 0 ? this.goNext() : this.goPrev();
+      }
+      startX = startY = null;
+    }, { passive: true });
+  }
+
+  _bindButtons() {
+    document.getElementById('btnPrev').addEventListener('click', () => this.goPrev());
+    document.getElementById('btnNext').addEventListener('click', () => this.goNext());
+  }
+
+  _bindHash() {
+    window.addEventListener('popstate', () => {
+      const m = location.hash.match(/^#slide-(\d+)$/);
+      if (m) {
+        const idx = Math.min(Math.max(parseInt(m[1], 10) - 1, 0), this.total - 1);
+        this._goSlide(idx, idx > this.current ? 'next' : 'prev');
+      }
+    });
+  }
+
+  _applyCodeHighlights(slide) {
+    slide.querySelectorAll('.code-block[data-highlight-lines]').forEach(block => {
+      const raw = block.getAttribute('data-highlight-lines') || '';
+      const highlighted = new Set();
+      raw.split(',').forEach(part => {
+        const range = part.trim().split('-');
+        if (range.length === 2) {
+          const [a, b] = range.map(Number);
+          for (let i = a; i <= b; i++) highlighted.add(i);
+        } else if (range.length === 1 && range[0]) {
+          highlighted.add(Number(range[0]));
+        }
+      });
+      block.querySelectorAll('.line').forEach((line, idx) => {
+        if (highlighted.has(idx + 1)) line.classList.add('line--highlight');
+      });
+      if (highlighted.size > 0) block.classList.add('dim-others');
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => new Presentation());
+</script>
+</body>
+</html>

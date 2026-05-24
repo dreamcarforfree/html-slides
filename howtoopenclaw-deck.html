@@ -441,6 +441,158 @@ ul li::before { content: '→ '; color: var(--accent); font-weight: bold; font-f
   text-transform: lowercase;
 }
 
+
+/* ===== Premium Layouts (round2-inspired) ===== */
+.premium-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(0.8rem, 2vw, 1.5rem);
+    width: 100%;
+    margin-top: 1rem;
+}
+.premium-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(0.5rem, 1.5vw, 1.2rem);
+    width: 100%;
+    margin-top: 1rem;
+}
+.dark-card {
+    background: #080808;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: clamp(1.2rem, 2.5vw, 2rem);
+    text-align: left;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.dark-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    border-color: rgba(56, 189, 132, 0.3);
+}
+.dark-card-title {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--accent);
+    margin-bottom: 0.8rem;
+    border-bottom: 1px solid #1a1a1a;
+    padding-bottom: 0.5rem;
+}
+.dark-card-desc {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+.dark-card-desc strong {
+    color: var(--text-primary);
+}
+
+.terminal-window {
+    background: #0a0a0a;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 100%;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+.terminal-bar {
+    background: #111;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid var(--border);
+}
+.terminal-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+.terminal-dot.r { background: #ff5f56; }
+.terminal-dot.y { background: #ffbd2e; }
+.terminal-dot.g { background: #27c93f; }
+.terminal-body {
+    padding: 1.2rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    text-align: left;
+}
+.terminal-line::before {
+    content: '> ';
+    color: var(--accent);
+}
+
+.agent-diagram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 1rem;
+    width: 100%;
+}
+.diagram-box {
+    background: #080808;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    flex: 1;
+    position: relative;
+}
+.diagram-arrow {
+    color: var(--text-dim);
+    font-size: 1.5rem;
+}
+.diagram-title {
+    font-family: var(--font-mono);
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+}
+
+ul.premium-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+ul.premium-list li {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    transition: background 0.2s;
+}
+ul.premium-list li:hover {
+    background: #080808;
+    border-color: rgba(56, 189, 132, 0.3);
+}
+ul.premium-list li::before {
+    content: '✓';
+    color: var(--accent);
+    font-size: 1.2rem;
+    line-height: 1.4;
+    font-family: sans-serif;
+}
+
+.price-card {
+    background: rgba(56, 189, 132, 0.05);
+    border: 1px solid rgba(56, 189, 132, 0.3);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    margin-top: 1rem;
+}
+.price-tag {
+    font-size: 4rem;
+    font-weight: 900;
+    color: #fff;
+    margin: 1rem 0;
+}
+
 </style>
 </head>
 <body>
@@ -466,17 +618,29 @@ ul li::before { content: '→ '; color: var(--accent); font-weight: bold; font-f
   <section class="slide slide--content" id="slide-2"
     role="region" aria-roledescription="slide" aria-label="slide 2" aria-hidden="true">
     <div class="slide__inner">
-      <div class="slide__header">
+      <div class="slide__header" style="text-align: center; align-items: center;">
         <div class="terminal-badge reveal">The Gap</div>
         <h2 class="reveal">Everyone talks about AI agents.<br>Almost no one actually has one.</h2>
       </div>
       <div class="slide__body">
-        <ul>
-          <li class="reveal">Tutorials assume command-line fluency</li>
-          <li class="reveal">Docs jump straight to API keys and YAML</li>
-          <li class="reveal">"Just install it" still leaves you stuck on step 3</li>
-          <li class="reveal">Engineers get the leverage. Everyone else watches.</li>
-        </ul>
+        <div class="premium-grid-2">
+            <div class="dark-card reveal">
+                <div class="dark-card-title">Tutorials</div>
+                <div class="dark-card-desc">Assume command-line fluency and advanced knowledge.</div>
+            </div>
+            <div class="dark-card reveal">
+                <div class="dark-card-title">Documentation</div>
+                <div class="dark-card-desc">Jumps straight to API keys, YAML, and dense code.</div>
+            </div>
+            <div class="dark-card reveal">
+                <div class="dark-card-title">"Just install it"</div>
+                <div class="dark-card-desc">Still leaves you completely stuck on step 3.</div>
+            </div>
+            <div class="dark-card reveal">
+                <div class="dark-card-title">The Reality</div>
+                <div class="dark-card-desc"><strong style="color:#fff;">Engineers get the leverage. Everyone else just watches.</strong></div>
+            </div>
+        </div>
       </div>
     </div>
   </section>
@@ -490,11 +654,11 @@ ul li::before { content: '→ '; color: var(--accent); font-weight: bold; font-f
         <h2 class="reveal">The easiest course ever built</h2>
       </div>
       <div class="slide__body">
-        <ul>
-          <li class="reveal">We give you every link</li>
-          <li class="reveal">We give you every prompt</li>
-          <li class="reveal">We give you every exact step</li>
-          <li class="reveal">No coding. No mechanics. No CS background.</li>
+        <ul class="premium-list">
+          <li class="reveal"><strong>We give you every link.</strong> No guessing where to download.</li>
+          <li class="reveal"><strong>We give you every prompt.</strong> Direct copy-and-paste.</li>
+          <li class="reveal"><strong>We give you every exact step.</strong> Analogies you actually understand.</li>
+          <li class="reveal"><strong>No coding. No mechanics. No CS background.</strong></li>
         </ul>
       </div>
     </div>
@@ -503,40 +667,36 @@ ul li::before { content: '→ '; color: var(--accent); font-weight: bold; font-f
   <!-- 04 — Curriculum overview -->
   <section class="slide slide--diagram" id="slide-4"
     role="region" aria-roledescription="slide" aria-label="slide 4" aria-hidden="true">
-    <div class="slide__inner">
-      <div class="slide__header">
+    <div class="slide__inner" style="max-width: 850px;">
+      <div class="slide__header" style="text-align: center; align-items: center;">
         <div class="terminal-badge reveal">Curriculum</div>
         <h2 class="reveal">Five chapters + a bonus</h2>
       </div>
       <div class="slide__body">
-        <div class="split">
-          <div class="split-card reveal">
-            <p style="font-size: clamp(0.8rem,1.3vw,1.05rem); margin-bottom: 0.6rem;">
-              <strong style="color: var(--accent);">Ch 0 — Hardware</strong><br>
-              What to use, what to avoid, what to buy if you must.
-            </p>
-            <p style="font-size: clamp(0.8rem,1.3vw,1.05rem); margin-bottom: 0.6rem;">
-              <strong style="color: #5cd6a0;">Ch 1 — Install</strong><br>
-              API keys, OpenClaw setup, core capabilities.
-            </p>
-            <p style="font-size: clamp(0.8rem,1.3vw,1.05rem);">
-              <strong style="color: #2ea571;">Ch 2 — Memory Migration</strong><br>
-              Import your ChatGPT, Claude &amp; Gemini history.
-            </p>
+        <div class="premium-grid-3">
+          <div class="dark-card reveal" style="padding: 1.2rem;">
+            <div class="dark-card-title">Ch 0 / Hardware</div>
+            <div class="dark-card-desc">What to use, what to avoid, what to buy if you must.</div>
           </div>
-          <div class="split-card reveal">
-            <p style="font-size: clamp(0.8rem,1.3vw,1.05rem); margin-bottom: 0.6rem;">
-              <strong style="color: var(--accent);">Ch 3 — Google Workspace</strong><br>
-              Gmail, Calendar, Docs, Sheets via Gog.
-            </p>
-            <p style="font-size: clamp(0.8rem,1.3vw,1.05rem); margin-bottom: 0.6rem;">
-              <strong style="color: #5cd6a0;">Ch 4 — Discord</strong><br>
-              Let your team use the agent you built.
-            </p>
-            <p style="font-size: clamp(0.8rem,1.3vw,1.05rem);">
-              <strong style="color: #2ea571;">Bonus — Training Tips</strong><br>
-              Real lessons. Skip the trial-and-error.
-            </p>
+          <div class="dark-card reveal" style="padding: 1.2rem;">
+            <div class="dark-card-title">Ch 1 / Install</div>
+            <div class="dark-card-desc">API keys, OpenClaw setup, core capabilities.</div>
+          </div>
+          <div class="dark-card reveal" style="padding: 1.2rem;">
+            <div class="dark-card-title">Ch 2 / Memory</div>
+            <div class="dark-card-desc">Import your ChatGPT, Claude & Gemini history.</div>
+          </div>
+          <div class="dark-card reveal" style="padding: 1.2rem;">
+            <div class="dark-card-title">Ch 3 / Workspace</div>
+            <div class="dark-card-desc">Gmail, Calendar, Docs, Sheets via Gog.</div>
+          </div>
+          <div class="dark-card reveal" style="padding: 1.2rem;">
+            <div class="dark-card-title">Ch 4 / Discord</div>
+            <div class="dark-card-desc">Let your entire team use the agent you built.</div>
+          </div>
+          <div class="dark-card reveal" style="padding: 1.2rem;">
+            <div class="dark-card-title">Bonus / Training</div>
+            <div class="dark-card-desc">Real lessons. Skip the trial-and-error.</div>
           </div>
         </div>
       </div>
@@ -552,37 +712,52 @@ ul li::before { content: '→ '; color: var(--accent); font-weight: bold; font-f
         <h2 class="reveal">Small wins, every day</h2>
       </div>
       <div class="slide__body">
-        <div class="info-card reveal">
-          <div class="card-title">// real student story</div>
-          <p>
-            The chiropractor's front desk printed her schedule for the next 10 sessions.<br>
-            She took a photo. Sent it to her agent. Said, <em>"add these to my calendar."</em><br>
-            <span style="color: var(--accent);">That's it.</span> No typing each event one by one.
-          </p>
+        <div class="terminal-window reveal">
+            <div class="terminal-bar">
+                <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
+            </div>
+            <div class="terminal-body">
+                <div class="terminal-line">User: <span style="color:#fff;">[Photo of 10 chiropractor sessions]</span> Add these to my calendar.</div>
+                <br>
+                <div class="terminal-line" style="color:var(--accent);">Agent: Extracting dates and times...</div>
+                <div class="terminal-line" style="color:var(--accent);">Agent: Creating 10 calendar events via AppleScript...</div>
+                <div class="terminal-line">Agent: Done. All 10 sessions are now in your calendar.</div>
+            </div>
         </div>
-        <div class="info-card reveal">
-          <div class="card-title">// the principle</div>
-          <p>Anything you currently type, search, copy, paste, or try to remember — your agent can do for you.</p>
-        </div>
+        <p class="reveal" style="text-align:center; color:var(--text-secondary); margin-top: 1rem;">
+            Anything you currently type, search, copy, paste, or try to remember — your agent can do for you.
+        </p>
       </div>
     </div>
   </section>
 
   <!-- 06 — Google Workspace -->
-  <section class="slide slide--content-alt" id="slide-6"
+  <section class="slide slide--diagram" id="slide-6"
     role="region" aria-roledescription="slide" aria-label="slide 6" aria-hidden="true">
     <div class="slide__inner">
-      <div class="slide__header">
-        <div class="terminal-badge reveal">Google Workspace</div>
+      <div class="slide__header" style="text-align: center; align-items: center;">
+        <div class="terminal-badge reveal">Workspace</div>
         <h2 class="reveal">Your daily operating layer</h2>
       </div>
       <div class="slide__body">
-        <ul>
-          <li class="reveal">30+ products: Gmail, Calendar, Docs, Sheets, Drive, Meet…</li>
-          <li class="reveal">Builds full reports and slide decks on request</li>
-          <li class="reveal">Plans your week, tracks follow-ups, drafts replies</li>
-          <li class="reveal">Even helps navigate office politics — using meeting transcripts and context</li>
-        </ul>
+        <div class="premium-grid-2">
+            <div class="dark-card reveal">
+                <div class="dark-card-title">30+ Products</div>
+                <div class="dark-card-desc">Native integration with Gmail, Calendar, Docs, Sheets, Drive, Meet, and more.</div>
+            </div>
+            <div class="dark-card reveal">
+                <div class="dark-card-title">Generative Work</div>
+                <div class="dark-card-desc">Builds full reports and slide decks on request directly in your Drive.</div>
+            </div>
+            <div class="dark-card reveal">
+                <div class="dark-card-title">Executive Assistant</div>
+                <div class="dark-card-desc">Plans your week, tracks follow-ups, drafts replies before you open your inbox.</div>
+            </div>
+            <div class="dark-card reveal">
+                <div class="dark-card-title">Political Navigator</div>
+                <div class="dark-card-desc">Uses meeting transcripts and context to suggest the most effective language.</div>
+            </div>
+        </div>
       </div>
     </div>
   </section>
@@ -596,13 +771,19 @@ ul li::before { content: '→ '; color: var(--accent); font-weight: bold; font-f
         <h2 class="reveal">Agents that earn while you sleep</h2>
       </div>
       <div class="slide__body">
-        <div class="info-card reveal">
-          <div class="card-title">// outbound</div>
-          <p>Lead generation. Cold emails. Following up until they reply. The same playbook you'd hand a junior employee — running on a schedule.</p>
-        </div>
-        <div class="info-card reveal">
-          <div class="card-title">// arbitrage</div>
-          <p>Polymarket scanner that watches odds 24/7, compares against public information, surfaces mispriced markets before you'd ever notice.</p>
+        <div class="premium-grid-2">
+          <div class="dark-card reveal" style="border-color: rgba(56, 189, 132, 0.4);">
+            <div class="dark-card-title">Outbound Sales</div>
+            <div class="dark-card-desc">
+              <strong>Lead generation.</strong> Cold emails. Following up until they reply. The exact same playbook you'd hand a junior employee — running continuously on a schedule.
+            </div>
+          </div>
+          <div class="dark-card reveal" style="border-color: rgba(56, 189, 132, 0.4);">
+            <div class="dark-card-title">Arbitrage Machine</div>
+            <div class="dark-card-desc">
+              <strong>Polymarket scanner</strong> that watches odds 24/7, compares against public information, and surfaces mispriced markets before you'd ever notice.
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -612,23 +793,30 @@ ul li::before { content: '→ '; color: var(--accent); font-weight: bold; font-f
   <section class="slide slide--diagram" id="slide-8"
     role="region" aria-roledescription="slide" aria-label="slide 8" aria-hidden="true">
     <div class="slide__inner">
-      <div class="slide__header">
+      <div class="slide__header" style="text-align: center; align-items: center;">
         <div class="terminal-badge reveal">Team Leverage</div>
         <h2 class="reveal">One agent. Your whole team.</h2>
       </div>
       <div class="slide__body">
-        <div class="split">
-          <div class="split-card reveal">
-            <p><strong style="color: var(--accent);">You build it.</strong><br>Configure once. Connect to your Workspace, your docs, your systems.</p>
-          </div>
-          <div class="split-card reveal">
-            <p><strong style="color: #5cd6a0;">They use it.</strong><br>Through Discord, from any device. No access to your accounts. No passwords. No touching your computer.</p>
-          </div>
+        <div class="agent-diagram reveal">
+            <div class="diagram-box">
+                <div class="diagram-title">You</div>
+                <div style="color:var(--text-secondary); font-size:0.9rem;">Configure & Connect</div>
+            </div>
+            <div class="diagram-arrow">→</div>
+            <div class="diagram-box" style="border-color: var(--accent); background: rgba(56, 189, 132, 0.05);">
+                <div class="diagram-title" style="font-size:1.2rem;">OpenClaw Agent</div>
+                <div style="color:var(--text-primary); font-size:0.9rem;">24/7 Engine</div>
+            </div>
+            <div class="diagram-arrow">→</div>
+            <div class="diagram-box">
+                <div class="diagram-title">Discord</div>
+                <div style="color:var(--text-secondary); font-size:0.9rem;">Team Interface</div>
+            </div>
         </div>
-        <div class="info-card reveal" style="margin-top: 0.8rem;">
-          <div class="card-title">// always on</div>
-          <p>Welcomes new members at 3am. Moderates while you're in meetings. Answers the repetitive questions so your team handles the hard ones.</p>
-        </div>
+        <p class="reveal" style="text-align:center; color:var(--text-dim); margin-top: 2rem; font-size: 0.95rem;">
+            Welcomes new members at 3am. Moderates while you're in meetings.<br>Answers repetitive questions so your team handles the hard ones.
+        </p>
       </div>
     </div>
   </section>
@@ -642,73 +830,79 @@ ul li::before { content: '→ '; color: var(--accent); font-weight: bold; font-f
         <h2 class="reveal">What students actually built</h2>
       </div>
       <div class="slide__body">
-        <ul>
-          <li class="reveal">🖨️ Etsy × 3D printer — agent picked a product, printed it overnight</li>
-          <li class="reveal">📈 Polymarket scanner — flags mispriced odds 24/7</li>
-          <li class="reveal">🛡️ Security watcher — caught a hacker mining Bitcoin on a network</li>
-          <li class="reveal">🎭 Persona stack — one script, two tones, two audiences</li>
-        </ul>
+        <div class="premium-grid-2">
+            <div class="dark-card reveal">
+                <div class="dark-card-title">🖨️ Etsy × 3D printer</div>
+                <div class="dark-card-desc">Agent picked a popular product to sell and printed it overnight while the owner slept.</div>
+            </div>
+            <div class="dark-card reveal">
+                <div class="dark-card-title">📈 Automated Arbitrage</div>
+                <div class="dark-card-desc">Scanning prediction markets 24/7 to flag odds that contradict reality.</div>
+            </div>
+            <div class="dark-card reveal">
+                <div class="dark-card-title">🛡️ Security Watcher</div>
+                <div class="dark-card-desc">Caught a hacker mining Bitcoin on a local network and surfaced the alert.</div>
+            </div>
+            <div class="dark-card reveal">
+                <div class="dark-card-title">🎭 Persona Stack</div>
+                <div class="dark-card-desc">One script rewritten into two tones (blunt vs empathetic) to reach two audiences.</div>
+            </div>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- 10 — Instructor -->
-  <section class="slide slide--content" id="slide-10"
+  <section class="slide slide--diagram" id="slide-10"
     role="region" aria-roledescription="slide" aria-label="slide 10" aria-hidden="true">
     <div class="slide__inner">
-      <div class="slide__header">
+      <div class="slide__header" style="text-align: center; align-items: center;">
         <div class="terminal-badge reveal">Your Instructor</div>
         <h2 class="reveal">Hi, this is Mirae 👋</h2>
       </div>
       <div class="slide__body">
-        <div class="info-card reveal">
-          <div class="card-title">// background</div>
-          <p>Silicon Valley UX designer. Works with engineers and founders, translating what they build into systems non-technical people can actually use.</p>
-        </div>
-        <div class="info-card reveal">
-          <div class="card-title">// course philosophy</div>
-          <p>Every technical step in plain language. Every command copy-and-paste. Every concept explained with analogies. Built <em>by</em> a non-coder, <em>for</em> non-coders — with an ex-Google tech lead behind the curtain.</p>
+        <div class="dark-card reveal" style="text-align: center; padding: 3rem 2rem;">
+            <p style="font-size: 1.1rem; color: #fff; margin-bottom: 1.5rem; line-height: 1.6;">
+                "I don’t write code. I design the systems that make code useful to real people."
+            </p>
+            <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                Silicon Valley UX designer. Works with engineers and founders, translating what they build into systems non-technical people can actually use.<br><br>
+                Every technical step in plain language. Every command copy-and-paste. Built <em>by</em> a non-coder, <em>for</em> non-coders — with an ex-Google tech lead behind the curtain.
+            </p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- 11 — Pricing -->
-  <section class="slide slide--diagram" id="slide-11"
+  <section class="slide slide--content" id="slide-11"
     role="region" aria-roledescription="slide" aria-label="slide 11" aria-hidden="true">
     <div class="slide__inner">
-      <div class="slide__header">
-        <div class="terminal-badge reveal">Pricing</div>
-        <h2 class="reveal">$150. One time.</h2>
-      </div>
       <div class="slide__body">
-        <div class="split">
-          <div class="split-card reveal">
-            <p style="font-size: clamp(0.9rem,1.5vw,1.15rem); margin-bottom: 0.5rem;">
-              <strong style="color: var(--accent);">What's inside</strong>
-            </p>
-            <p style="font-size: clamp(0.8rem,1.2vw,1rem);">
-              5 chapters + bonus<br>
-              Step-by-step videos<br>
-              Copy-and-paste prompts<br>
-              4.9 / 5 from students worldwide
-            </p>
-          </div>
-          <div class="split-card reveal">
-            <p style="font-size: clamp(0.9rem,1.5vw,1.15rem); margin-bottom: 0.5rem;">
-              <strong style="color: #5cd6a0;">What it replaces</strong>
-            </p>
-            <p style="font-size: clamp(0.8rem,1.2vw,1rem);">
-              Hiring a developer ($5k+)<br>
-              Weeks of trial and error<br>
-              SaaS tools you keep renting<br>
-              The feeling of falling behind
-            </p>
-          </div>
+        <div class="price-card reveal">
+            <div class="terminal-badge" style="display:inline-block;">Lifetime Access</div>
+            <div class="price-tag">$150</div>
+            <p style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 2rem;">1–2 days to install. A lifetime to use.</p>
+            
+            <div style="display:flex; justify-content:center; gap: 2rem; text-align: left;">
+                <div>
+                    <div style="color:var(--accent); font-family:var(--font-mono); margin-bottom:0.5rem;">// what you get</div>
+                    <ul style="color:#fff; font-size:0.95rem; line-height:1.6;">
+                        <li>• 5 chapters + bonus</li>
+                        <li>• Step-by-step videos</li>
+                        <li>• Copy-and-paste prompts</li>
+                    </ul>
+                </div>
+                <div>
+                    <div style="color:var(--text-dim); font-family:var(--font-mono); margin-bottom:0.5rem;">// what it replaces</div>
+                    <ul style="color:var(--text-secondary); font-size:0.95rem; line-height:1.6;">
+                        <li>• Hiring a developer ($5k+)</li>
+                        <li>• Weeks of trial and error</li>
+                        <li>• Monthly SaaS rentals</li>
+                    </ul>
+                </div>
+            </div>
         </div>
-        <p class="reveal" style="text-align: center; color: var(--accent); font-family: var(--font-mono); font-size: clamp(0.8rem,1.2vw,1rem); margin-top: 0.6rem;">
-          1–2 days to install. Lifetime to use.
-        </p>
       </div>
     </div>
   </section>
@@ -719,20 +913,15 @@ ul li::before { content: '→ '; color: var(--accent); font-weight: bold; font-f
     <div class="slide__inner" style="text-align: center; align-items: center;">
       <div class="slide__body" style="align-items: center;">
         <div class="terminal-badge reveal">Stop watching. Start building.</div>
-        <h1 class="reveal">Build yours.</h1>
-        <div class="accent-line reveal" style="margin: 0.8rem auto;"></div>
-        <p class="reveal" style="font-size: clamp(0.95rem,1.8vw,1.3rem);">
+        <h1 class="reveal" style="font-size: clamp(3rem, 8vw, 5rem); margin: 0.5rem 0;">Build yours.</h1>
+        <p class="reveal" style="font-size: clamp(0.95rem,1.8vw,1.3rem); color: var(--text-secondary);">
           This is your best leverage for 2026.<br>
           Don't waste one more day.
         </p>
-        <p class="reveal" style="font-family: var(--font-mono); color: var(--accent); font-size: clamp(1rem,2vw,1.4rem); margin-top: 0.8rem;">
-          www.howtoopenclaw.ai
-        </p>
-        <div class="reveal" style="display: flex; gap: 0.5rem; margin-top: 0.8rem; justify-content: center; flex-wrap: wrap;">
-          <span class="badge">$150 one-time</span>
-          <span class="badge">4.9 / 5</span>
-          <span class="badge">No coding</span>
-          <span class="badge">1–2 days</span>
+        <div class="reveal" style="margin-top: 2rem;">
+            <a href="https://www.howtoopenclaw.ai" target="_blank" style="display:inline-block; background:var(--accent); color:#000; padding:12px 24px; border-radius:4px; text-decoration:none; font-weight:bold; font-family:var(--font-en), sans-serif; letter-spacing:0.05em; transition: transform 0.2s;">
+                ENROLL NOW
+            </a>
         </div>
       </div>
     </div>

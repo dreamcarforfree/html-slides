@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why We Procrastinate & How to Stop (Light Edition) — Aloha Dream Life</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ===== Design tokens — Premium Light (Consulting-grade) ===== */
+:root {
+  /* Core palette */
+  --bg:           #FAFAF8;          /* warm white, never harsh */
+  --bg-subtle:    #F4F3EF;          /* slightly warmer for cards */
+  --bg-inset:     #EEECEA;          /* deepest inset bg */
+
+  /* Accent: Indigo × Teal dual-tone */
+  --accent:       #2D4B8E;          /* deep navy-indigo — headlines, badges */
+  --accent-warm:  #B85C38;          /* terracotta — second accent */
+  --accent-teal:  #2A7F6F;          /* forest teal — third accent */
+  --accent-gold:  #B89A4A;          /* warm gold — rule lines */
+  --accent-dim:   rgba(45,75,142,0.08);
+  --accent-glow:  rgba(45,75,142,0.16);
+
+  /* Text */
+  --text-primary:   #1A1A2E;        /* near-black navy */
+  --text-secondary: #4A4A6A;        /* muted navy */
+  --text-dim:       #8A8AA8;        /* placeholder / footer */
+
+  /* Borders */
+  --border:         #DDD9D2;        /* warm grey */
+  --border-accent:  rgba(184,154,74,0.35);  /* gold rule */
+
+  /* Fonts */
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-en:    'Inter', system-ui, sans-serif;
+  --font-mono:  'JetBrains Mono', 'Courier New', monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ===== Reset ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-en);
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text-primary);
+}
+
+/* ===== Viewport ===== */
+.slide-viewport {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--bg);
+  overflow: hidden;
+}
+.slide-viewport.animating { pointer-events: none; }
+
+/* ===== Slide base ===== */
+.slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: clamp(2.5rem, 6vw, 5rem) clamp(3rem, 8vw, 8rem);
+
+  opacity: 0;
+  transform: translateX(100%);
+  pointer-events: none;
+  transition:
+    opacity 400ms ease-in-out,
+    transform 450ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.slide.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+  z-index: 2;
+}
+.slide.stand-left { transform: translateX(-100%); }
+
+/* Subtle grid texture */
+.slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border-accent) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-accent) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+.slide > * { position: relative; z-index: 2; }
+
+/* ===== Layout ===== */
+.slide__inner {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: center;
+  gap: clamp(0.8rem, 2vw, 1.6rem);
+}
+.slide__header {}
+.slide__body { display: flex; flex-direction: column; gap: 1rem; }
+.slide__footer {
+  font-size: clamp(0.6rem, 0.9vw, 0.75rem);
+  color: var(--text-dim);
+  text-align: right;
+  margin-top: auto;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+/* ===== Typography ===== */
+h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.4rem, 3vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 0.6rem;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+h3 {
+  font-family: var(--font-en);
+  font-size: clamp(1rem, 1.8vw, 1.4rem);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+p, li {
+  font-family: var(--font-en);
+  font-size: clamp(0.85rem, 1.4vw, 1.15rem);
+  line-height: 1.75;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+ul li {
+  padding: clamp(0.55rem, 0.9vw, 0.75rem) clamp(0.9rem, 1.3vw, 1.1rem);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s ease, border-left-color 0.2s ease;
+}
+ul li:nth-child(2) { border-left-color: var(--accent-teal); }
+ul li:nth-child(3) { border-left-color: var(--accent-warm); }
+ul li:nth-child(4) { border-left-color: var(--accent-gold); }
+ul li::before { content: ''; flex-shrink: 0; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); margin-top: 0.55em; }
+ul li:nth-child(2)::before { background: var(--accent-teal); }
+ul li:nth-child(3)::before { background: var(--accent-warm); }
+ul li:nth-child(4)::before { background: var(--accent-gold); }
+
+/* ===== Slide variants ===== */
+.slide--intro  { background: linear-gradient(135deg, #FAFAF8 0%, #F0EEF8 100%); }
+.slide--content { background: var(--bg); }
+.slide--content-alt { background: linear-gradient(160deg, #FAFAF8 60%, #F0F4F0 100%); }
+.slide--code   { background: var(--bg); }
+.slide--diagram { background: linear-gradient(135deg, #F8F6F0 0%, #F0F4F8 100%); }
+.slide--end    { background: linear-gradient(135deg, #1A1A2E 0%, #2D2D4E 100%); }
+.slide--end h1, .slide--end h2, .slide--end p, .slide--end .accent-line { color: #F0EBE0; }
+.slide--end .slide__footer { color: rgba(240,235,224,0.35); }
+.slide--end .badge { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color: #C6A55C; }
+
+/* ===== Reveal animation ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.55s var(--ease-out-expo), transform 0.55s var(--ease-out-expo);
+}
+.slide.active .reveal { opacity: 1; transform: translateY(0); }
+
+.reveal:nth-child(1) { transition-delay: 0.06s; }
+.reveal:nth-child(2) { transition-delay: 0.14s; }
+.reveal:nth-child(3) { transition-delay: 0.22s; }
+.reveal:nth-child(4) { transition-delay: 0.30s; }
+.reveal:nth-child(5) { transition-delay: 0.38s; }
+.reveal:nth-child(6) { transition-delay: 0.46s; }
+.reveal:nth-child(7) { transition-delay: 0.54s; }
+.reveal:nth-child(8) { transition-delay: 0.62s; }
+.slide.active .slide__body > .reveal:nth-child(1) { transition-delay: 0.14s; }
+.slide.active .slide__body > .reveal:nth-child(2) { transition-delay: 0.24s; }
+.slide.active .slide__body > .reveal:nth-child(3) { transition-delay: 0.34s; }
+.slide.active .slide__body > .reveal:nth-child(4) { transition-delay: 0.44s; }
+.slide.active .slide__body > .reveal:nth-child(5) { transition-delay: 0.54s; }
+.slide.active ul li.reveal:nth-child(1) { transition-delay: 0.14s; }
+.slide.active ul li.reveal:nth-child(2) { transition-delay: 0.24s; }
+.slide.active ul li.reveal:nth-child(3) { transition-delay: 0.34s; }
+.slide.active ul li.reveal:nth-child(4) { transition-delay: 0.44s; }
+.slide.active ul li.reveal:nth-child(5) { transition-delay: 0.54s; }
+
+/* ===== Components ===== */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+.split-card {
+  padding: clamp(0.9rem, 1.6vw, 1.3rem);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.info-card {
+  padding: clamp(1rem, 1.8vw, 1.4rem);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 100%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.info-card .card-title {
+  font-family: var(--font-mono);
+  font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+  color: var(--accent);
+  margin-bottom: 0.6rem;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+.badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+  color: var(--accent);
+  padding: 0.25em 0.7em;
+  border: 1px solid var(--accent-dim);
+  border-radius: 100px;
+  letter-spacing: 0.04em;
+  background: var(--accent-dim);
+  font-weight: 500;
+}
+
+/* Eyebrow label */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: clamp(0.7rem, 1vw, 0.85rem);
+  color: var(--accent);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+  display: block;
+}
+
+/* Gold rule */
+.rule-line {
+  width: 48px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-gold), transparent);
+  margin: 0.4rem 0 0.6rem;
+}
+
+.accent-line {
+  width: 50px;
+  height: 2px;
+  background: var(--accent-gold);
+  margin: 0.5rem 0;
+}
+
+/* Big title for intro */
+.big-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.4rem, 7vw, 5.5rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  text-align: center;
+  color: var(--text-primary);
+}
+.big-title .accent { color: var(--accent); }
+
+.intro-sub {
+  font-family: var(--font-mono);
+  font-size: clamp(0.8rem, 1.3vw, 1rem);
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+.intro-tag {
+  font-family: var(--font-mono);
+  font-size: clamp(0.75rem, 1.1vw, 0.9rem);
+  color: var(--accent);
+  letter-spacing: 0.16em;
+  text-transform: lowercase;
+}
+
+/* ===== Navigation UI ===== */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: rgba(45,75,142,0.08);
+  z-index: 101;
+}
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-teal));
+  transition: width 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.slide-counter {
+  position: fixed;
+  bottom: 16px;
+  right: 24px;
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  z-index: 102;
+  letter-spacing: 0.06em;
+}
+.nav-buttons {
+  position: fixed;
+  bottom: 16px;
+  left: 24px;
+  display: flex;
+  gap: 6px;
+  z-index: 102;
+}
+.nav-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.8);
+  color: var(--text-dim);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.nav-btn:hover { background: #fff; color: var(--accent); border-color: var(--accent); box-shadow: 0 2px 8px rgba(45,75,142,0.12); }
+.slide--end .progress-bar { background: rgba(255,255,255,0.1); }
+
+/* ===== Responsive ===== */
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .slide { transition-duration: 0.1s !important; }
+  .reveal { transform: none !important; }
+}
+@media (hover: none) and (pointer: coarse) {
+  .nav-btn { width: 44px; height: 44px; }
+}
+@media (max-height: 600px) {
+  .slide { padding: clamp(1rem, 3vw, 2rem); }
+  h1 { font-size: clamp(1.5rem, 4vw, 2.5rem); }
+  h2 { font-size: clamp(1.2rem, 2.5vw, 1.8rem); }
+}
+
+/* Intro centering */
+.slide--intro .slide__inner { max-width: 1000px; align-items: center; text-align: center; }
+.slide--intro .slide__header,
+.slide--intro .slide__body { align-items: center; text-align: center; }
+
+/* End slide overrides */
+.slide--end .eyebrow { color: var(--accent-gold); }
+.slide--end .info-card { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); }
+.slide--end .info-card .card-title { color: var(--accent-gold); }
+.slide--end .info-card p { color: rgba(240,235,224,0.75); }
+.slide--end ul li { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+.slide--end ul li p { color: rgba(240,235,224,0.8); }
+
+</style>
+</head>
+<body>
+
+<div class="slide-viewport" id="viewport">
+
+  <!-- 01 — Title -->
+  <section class="slide slide--intro active" id="slide-1"
+    role="region" aria-roledescription="slide" aria-label="slide 1" aria-hidden="false">
+    <div class="slide__inner">
+      <div class="slide__body">
+        <div class="intro-tag reveal">// aloha dream life</div>
+        <div class="big-title reveal">
+          Overcoming<br><span class="accent">Procrastination</span>
+        </div>
+        <div class="rule-line reveal" style="margin: 0.6rem auto;"></div>
+        <div class="intro-sub reveal">// the real reason. the real fix.</div>
+      </div>
+      <div class="slide__footer" style="text-align: center;">Aloha Dream Life &nbsp;·&nbsp; 2026</div>
+    </div>
+  </section>
+
+  <!-- 02 — The Myth -->
+  <section class="slide slide--content" id="slide-2"
+    role="region" aria-roledescription="slide" aria-label="slide 2" aria-hidden="true">
+    <div class="slide__inner">
+      <div class="slide__header">
+        <span class="eyebrow reveal">The Myth of Laziness</span>
+        <h2 class="reveal">Procrastination is Emotional</h2>
+        <div class="rule-line reveal"></div>
+      </div>
+      <div class="slide__body">
+        <ul>
+          <li class="reveal">It is not about being lazy or unmotivated.</li>
+          <li class="reveal">It is an instinctive emotional escape from task discomfort.</li>
+          <li class="reveal">Tasks that are vague, difficult, or boring trigger mental friction.</li>
+          <li class="reveal">Smartphones are merely convenient escape hatches from those feelings.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 — Strategy -->
+  <section class="slide slide--diagram" id="slide-3"
+    role="region" aria-roledescription="slide" aria-label="slide 3" aria-hidden="true">
+    <div class="slide__inner">
+      <div class="slide__header">
+        <span class="eyebrow reveal">The Strategy</span>
+        <h2 class="reveal">How to Stop Avoiding</h2>
+        <div class="rule-line reveal"></div>
+      </div>
+      <div class="slide__body">
+        <div class="split">
+          <div class="split-card reveal">
+            <p style="font-size: clamp(0.8rem, 1.3vw, 1.05rem); margin-bottom: 0.8rem;">
+              <strong style="color: var(--accent);">Reframe & Reduce</strong><br>
+              Inject curiosity and novelty into tasks to dissolve boredom. Break goals into tiny microscopic milestones.
+            </p>
+            <p style="font-size: clamp(0.8rem, 1.3vw, 1.05rem);">
+              <strong style="color: var(--accent-warm);">Surf the Urge</strong><br>
+              Ride out discomfort spikes for exactly 10 minutes before caving to any distraction.
+            </p>
+          </div>
+          <div class="split-card reveal">
+            <p style="font-size: clamp(0.8rem, 1.3vw, 1.05rem); margin-bottom: 0.8rem;">
+              <strong style="color: var(--accent-teal);">Make Escapes Hard</strong><br>
+              Increase the physical friction to distract yourself (hide phones, lock apps).
+            </p>
+            <p style="font-size: clamp(0.8rem, 1.3vw, 1.05rem);">
+              <strong style="color: var(--accent-gold);">Leverage Social Animal</strong><br>
+              Shift motivation from yourself to inspiring others or accountability partners.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 — Hack 1 -->
+  <section class="slide slide--content-alt" id="slide-4"
+    role="region" aria-roledescription="slide" aria-label="slide 4" aria-hidden="true">
+    <div class="slide__inner">
+      <div class="slide__header">
+        <span class="eyebrow reveal">Hack 1: Friction</span>
+        <h2 class="reveal">Reframe & Shrink the Task</h2>
+        <div class="rule-line reveal"></div>
+      </div>
+      <div class="slide__body">
+        <ul>
+          <li class="reveal">Curiosity cures boredom — treat your task as a playful puzzle.</li>
+          <li class="reveal">Aggressively break goals down into small, non-threatening milestones.</li>
+          <li class="reveal">Commit to writing just one sentence rather than a whole page.</li>
+          <li class="reveal">Once you cross the starting line, momentum naturally carries you forward.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 — Behavior Design -->
+  <section class="slide slide--diagram" id="slide-5"
+    role="region" aria-roledescription="slide" aria-label="slide 5" aria-hidden="true">
+    <div class="slide__inner">
+      <div class="slide__header">
+        <span class="eyebrow reveal">Behavior Design</span>
+        <h2 class="reveal">Crossing BJ Fogg's Action Line</h2>
+        <div class="rule-line reveal"></div>
+      </div>
+      <div class="slide__body">
+        <div class="split">
+          <div class="split-card reveal">
+            <h3 style="font-size: clamp(0.85rem, 1.2vw, 1.05rem); color: var(--accent); margin-bottom: 0.5rem;">The Success Zone</h3>
+            <p style="font-size: clamp(0.75rem, 1.1vw, 0.95rem); margin-bottom: 0.5rem;">
+              Action occurs when: <strong style="color: var(--text-primary);">Motivation x Ability x Prompt</strong> aligns.
+            </p>
+            <p style="font-size: clamp(0.75rem, 1.1vw, 0.95rem);">
+              Increase your ability by shrinking the task. Shift difficult work into the Easy zone!
+            </p>
+          </div>
+          <div class="split-card reveal">
+            <h3 style="font-size: clamp(0.85rem, 1.2vw, 1.05rem); color: var(--accent-warm); margin-bottom: 0.5rem;">Raise Distraction Friction</h3>
+            <p style="font-size: clamp(0.75rem, 1.1vw, 0.95rem); margin-bottom: 0.5rem;">
+              Smartphones occupy the success zone because they are incredibly easy to use.
+            </p>
+            <p style="font-size: clamp(0.75rem, 1.1vw, 0.95rem);">
+              Force distractions out of the zone by physically isolating your phone or locking apps.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 — Hack 2 -->
+  <section class="slide slide--content" id="slide-6"
+    role="region" aria-roledescription="slide" aria-label="slide 6" aria-hidden="true">
+    <div class="slide__inner">
+      <div class="slide__header">
+        <span class="eyebrow reveal">Hack 2: Urge Surfing</span>
+        <h2 class="reveal">Dopamine & The 10-Min Rule</h2>
+        <div class="rule-line reveal"></div>
+      </div>
+      <div class="slide__body">
+        <ul>
+          <li class="reveal">Dopamine spikes right *before* we cave to distraction, not after.</li>
+          <li class="reveal">Ride out the peak spike using the 10-Minute Rule.</li>
+          <li class="reveal">If you resist for 10 minutes, the discomfort spike naturally subsides.</li>
+          <li class="reveal">Reward your restraint with healthy, goal-aligned treats.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 — Hack 3 -->
+  <section class="slide slide--content-alt" id="slide-7"
+    role="region" aria-roledescription="slide" aria-label="slide 7" aria-hidden="true">
+    <div class="slide__inner">
+      <div class="slide__header">
+        <span class="eyebrow reveal">Hack 3: Social Connection</span>
+        <h2 class="reveal">Leverage Your Social Nature</h2>
+        <div class="rule-line reveal"></div>
+      </div>
+      <div class="slide__body">
+        <ul>
+          <li class="reveal">Humans are deeply wired to fulfill social promises.</li>
+          <li class="reveal">Accountability partners dramatically increase follow-through.</li>
+          <li class="reveal">Shift your framing from "I must do this" to "I will inspire others."</li>
+          <li class="reveal">Designing the behavior works far better than raw willpower.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 — Action Plan -->
+  <section class="slide slide--content" id="slide-8"
+    role="region" aria-roledescription="slide" aria-label="slide 8" aria-hidden="true">
+    <div class="slide__inner">
+      <div class="slide__header">
+        <span class="eyebrow reveal">Execution</span>
+        <h2 class="reveal">Your Quick Action Plan</h2>
+        <div class="rule-line reveal"></div>
+      </div>
+      <div class="slide__body">
+        <ul>
+          <li class="reveal">1. Identify the task & pinpoint the exact emotional discomfort.</li>
+          <li class="reveal">2. Reframe with a playful twist, adding curiosity or novelty.</li>
+          <li class="reveal">3. Shrink to the smallest microscopic step: e.g. open the file.</li>
+          <li class="reveal">4. Surf the urge: wait exactly 10 minutes before checking your phone.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 — End -->
+  <section class="slide slide--end" id="slide-9"
+    role="region" aria-roledescription="slide" aria-label="slide 9" aria-hidden="true">
+    <div class="slide__inner" style="text-align: center; align-items: center;">
+      <div class="slide__body" style="align-items: center;">
+        <span class="eyebrow reveal">No More Avoiding</span>
+        <h1 class="reveal">Embrace Curiosity</h1>
+        <div class="accent-line reveal" style="margin: 0.8rem auto;"></div>
+        <p class="reveal" style="font-size: clamp(0.85rem, 1.3vw, 1.1rem); max-width: 500px; margin-top: 0.5rem; text-align: center;">
+          Design your behavior, embrace curiosity, and take that first microscopic step today.
+        </p>
+        <div class="reveal" style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
+          <span class="badge">Aloha Dream Life</span>
+          <span class="badge">Fogg Model</span>
+          <span class="badge">Huberman Insights</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Navigation UI -->
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+<div class="slide-counter" id="slideCounter">01 / 09</div>
+<div class="nav-buttons">
+  <button class="nav-btn" id="btnPrev" aria-label="Previous Slide">&#8249;</button>
+  <button class="nav-btn" id="btnNext" aria-label="Next Slide">&#8250;</button>
+</div>
+
+<script>
+class Presentation {
+  constructor() {
+    this.viewport = document.getElementById('viewport');
+    this.slides = Array.from(this.viewport.querySelectorAll('.slide'));
+    this.total = this.slides.length;
+    this.current = 0;
+    this.isAnimating = false;
+    this.DURATION = 450;
+
+    // Restore initial slide from URL hash
+    this._restoreFromHash();
+
+    // Event binding
+    this._bindKeyboard();
+    this._bindTouch();
+    this._bindButtons();
+    this._bindHash();
+    this._updateUI();
+  }
+
+  goNext() {
+    if (this.isAnimating || this.current >= this.total - 1) return;
+    this._goSlide(this.current + 1, 'next');
+  }
+
+  goPrev() {
+    if (this.isAnimating || this.current <= 0) return;
+    this._goSlide(this.current - 1, 'prev');
+  }
+
+  _goSlide(target, dir) {
+    this.isAnimating = true;
+    this.viewport.classList.add('animating');
+
+    const leaving = this.slides[this.current];
+    const entering = this.slides[target];
+
+    leaving.classList.remove('active');
+    if (dir === 'next') leaving.classList.add('stand-left');
+    leaving.setAttribute('aria-hidden', 'true');
+
+    entering.style.transform = dir === 'next' ? 'translateX(100%)' : 'translateX(-100%)';
+    entering.classList.remove('stand-left');
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        entering.classList.add('active');
+        entering.setAttribute('aria-hidden', 'false');
+        entering.style.transform = '';
+      });
+    });
+
+    const cleanup = () => {
+      this.isAnimating = false;
+      this.viewport.classList.remove('animating');
+      leaving.classList.remove('stand-left');
+      leaving.style.transform = '';
+    };
+
+    entering.addEventListener('transitionend', cleanup, { once: true });
+    setTimeout(cleanup, this.DURATION + 100);
+
+    this.current = target;
+    this._updateUI();
+    history.replaceState(null, '', `#slide-${target + 1}`);
+  }
+
+  _updateUI() {
+    const n = String(this.current + 1).padStart(2, '0');
+    const t = String(this.total).padStart(2, '0');
+    document.getElementById('slideCounter').textContent = `${n} / ${t}`;
+    const pct = this.total > 1 ? (this.current / (this.total - 1)) * 100 : 100;
+    document.getElementById('progressFill').style.width = `${pct}%`;
+    document.getElementById('btnPrev').disabled = this.current === 0;
+    document.getElementById('btnNext').disabled = this.current === this.total - 1;
+  }
+
+  _restoreFromHash() {
+    const m = location.hash.match(/^#slide-(\d+)$/);
+    if (m) {
+      const idx = Math.min(Math.max(parseInt(m[1], 10) - 1, 0), this.total - 1);
+      if (idx !== 0) {
+        this.slides[0].classList.remove('active');
+        this.slides[0].setAttribute('aria-hidden', 'true');
+        this.slides[idx].classList.add('active');
+        this.slides[idx].setAttribute('aria-hidden', 'false');
+        this.current = idx;
+      }
+    }
+  }
+
+  _bindKeyboard() {
+    document.addEventListener('keydown', e => {
+      switch(e.key) {
+        case 'ArrowRight': case 'ArrowDown': case ' ': case 'PageDown': e.preventDefault(); this.goNext(); break;
+        case 'ArrowLeft':  case 'ArrowUp':             case 'PageUp':   e.preventDefault(); this.goPrev(); break;
+        case 'Home': e.preventDefault(); this._goSlide(0, 'prev'); break;
+        case 'End':  e.preventDefault(); this._goSlide(this.total - 1, 'next'); break;
+        case 'f': case 'F': !document.fullscreenElement ? document.documentElement.requestFullscreen?.() : document.exitFullscreen?.(); break;
+      }
+    });
+  }
+
+  _bindTouch() {
+    let startX = null, startY = null;
+    this.viewport.addEventListener('touchstart', e => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }, { passive: true });
+    this.viewport.addEventListener('touchend', e => {
+      if (startX === null) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = e.changedTouches[0].clientY - startY;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+        dx < 0 ? this.goNext() : this.goPrev();
+      }
+      startX = startY = null;
+    }, { passive: true });
+  }
+
+  _bindButtons() {
+    document.getElementById('btnPrev').addEventListener('click', () => this.goPrev());
+    document.getElementById('btnNext').addEventListener('click', () => this.goNext());
+  }
+
+  _bindHash() {
+    window.addEventListener('popstate', () => {
+      const m = location.hash.match(/^#slide-(\d+)$/);
+      if (m) {
+        const idx = Math.min(Math.max(parseInt(m[1], 10) - 1, 0), this.total - 1);
+        this._goSlide(idx, idx > this.current ? 'next' : 'prev');
+      }
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => new Presentation());
+</script>
+</body>
+</html>
